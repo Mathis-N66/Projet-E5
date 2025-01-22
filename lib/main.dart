@@ -1,9 +1,7 @@
 import 'package:application_administrative/formulaireI.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'formulaireC.dart';
-import 'formulaireI.dart';
+import 'maintenance.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,10 +43,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 fit: BoxFit.cover,
               ),
             ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MaintenancePage(title: 'Maintenance'),
+                  ),
+                );
+              },
+            ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Spacer(),
+                const Spacer(),
                 const Text(
                   'Bienvenue à vous !',
                   style: TextStyle(
@@ -66,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontSize: 25,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
       ),
-      home: const FormulaireI(title: 'Connexion'),
+      home: const FormulaireI(title: 'Inscription'),
     );
   }
 }
@@ -34,6 +34,61 @@ class FormulaireI extends StatefulWidget {
 
 class _FormulaireIPage extends State<FormulaireI> {
   bool? checkBoxValue = false;
+  final TextEditingController nomController = TextEditingController();
+  final TextEditingController prenomController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController motifDemandeController = TextEditingController();
+
+ Future<void> envoyerDemande() async {
+  final String apiUrl = "http://10.0.2.2:3000/demande"; // Votre URL d'API
+
+  if (!checkBoxValue!) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Veuillez accepter le traitement des données."),
+      ),
+    );
+    return;
+  }
+
+  // Envoi de la requête POST
+  final response = await http.post(
+    Uri.parse(apiUrl),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "nom": nomController.text,
+      "prenom": prenomController.text,
+      "email": emailController.text,
+      "password": passwordController.text,
+      "motifDemande": motifDemandeController.text,
+    }),
+  );
+
+  // Affichage des détails de la réponse dans la console
+  print("Réponse de l'API : ${response.statusCode}");
+  if (response.statusCode == 200) {
+    // Success
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Demande envoyée avec succès.")),
+    );
+
+    nomController.clear();
+    prenomController.clear();
+    emailController.clear();
+    passwordController.clear();
+    motifDemandeController.clear();
+    setState(() {
+      checkBoxValue = false;
+    });
+  } else {
+    // Affiche les erreurs éventuelles dans la console
+    print("Erreur de l'API : ${response.body}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Erreur lors de l'envoi de la demande.")),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -60,30 +115,21 @@ class _FormulaireIPage extends State<FormulaireI> {
                   children: [
                     Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 0), 
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         ),
-                        const Expanded(
-                          child: const Text(
-                            'My App admin V1',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        const Text(
+                          'Back',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Demande d\inscription',
+                      'Demande d\'inscription',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -92,7 +138,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ),
                     const SizedBox(height: 16),
                     TextField(
-                      obscureText: true,
+                      controller: nomController,
                       decoration: InputDecoration(
                         labelText: 'Nom',
                         border: OutlineInputBorder(
@@ -102,7 +148,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ),
                     const SizedBox(height: 16),
                     TextField(
-                      obscureText: true,
+                      controller: prenomController,
                       decoration: InputDecoration(
                         labelText: 'Prenom',
                         border: OutlineInputBorder(
@@ -112,6 +158,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ),
                     const SizedBox(height: 16),
                     TextField(
+                      controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
                         border: OutlineInputBorder(
@@ -122,6 +169,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     const SizedBox(height: 16),
                     TextField(
                       obscureText: true,
+                      controller: passwordController,
                       decoration: InputDecoration(
                         labelText: 'Mot de passe',
                         border: OutlineInputBorder(
@@ -131,6 +179,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ),
                     const SizedBox(height: 16),
                     TextField(
+                      controller: motifDemandeController,
                       decoration: InputDecoration(
                         labelText: 'Motif de la demande',
                         border: OutlineInputBorder(
@@ -161,9 +210,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
-                        
-                      },
+                      onPressed: envoyerDemande,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 94, 237, 86),
                         minimumSize: const Size(double.infinity, 50),
@@ -176,6 +223,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                         style: TextStyle(color: Colors.black),
                       ),
                     ),
+
                     const SizedBox(height: 16),
                     GestureDetector(
                       onTap: () {

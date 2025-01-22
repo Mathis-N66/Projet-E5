@@ -1,20 +1,21 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = 3000;
 
-// Middleware pour parser le body des requêtes en JSON
 app.use(bodyParser.json());
 
 // Configuration de la connexion à MySQL
 const db = mysql.createConnection({
-  host: '10.50.0.24', // Remplacez par l'IP de votre serveur MySQL
-  user: 'mathis1',         // Nom d'utilisateur de la base de données
-  password: 'XXKa7TF1B6N0B94E',     // Mot de passe de la base de données
-  database: 'gestion_mathis'  // Nom de la base de données
+  host: '10.50.0.24',
+  user: 'mathis1',
+  password: 'XXKa7TF1B6N0B94E',
+  database: 'gestion_mathis'
 });
+
 // Connexion à MySQL
 db.connect((err) => {
   if (err) {
@@ -24,12 +25,9 @@ db.connect((err) => {
   console.log('Connecté à la base de données MySQL');
 });
 
-
-
-
-// Endpoint pour récupérer toutes les nations
-app.get('/nation', (req, res) => {
-  const sql = 'SELECT * FROM nation';
+// Routes pour gérer les demandes
+app.get('/demande', (req, res) => {
+  const sql = 'SELECT * FROM `demande-i`';
   db.query(sql, (err, results) => {
     if (err) {
       return res.status(500).send(err);
@@ -37,105 +35,63 @@ app.get('/nation', (req, res) => {
     res.json(results);
   });
 });
-app.get('/nation/:nom', (req, res) => {
-  // Capture le paramètre 'nom' de l'URL
-  const nom = '%'+req.params.nom+'%';
-  // Crée la requête SQL avec un paramètre pour le nom
-  const sql = 'SELECT * FROM nation WHERE nom LIKE ?';
 
-  db.query(sql, [nom], (err, results) => {
+app.post('/demande', async (req, res) => {
+  const { nom, prenom, email, password, motifDemande } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const sql = 'INSERT INTO `demande-i` (nom, prenom, email, password, motifDemande, status) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(sql, [nom, prenom, email, hashedPassword, motifDemande, 'En attente'], (err, result) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      res.json({ 
+        id: result.insertId, 
+        nom, 
+        prenom, 
+        email, 
+        motifDemande, 
+        status: 'En attente' 
+      });
+    });
+  } catch (err) {
+    res.status(500).send('Erreur lors du hashage du mot de passe');
+  }
+});
+
+// Routes pour gérer la connexion
+app.post('/connexion', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email et mot de passe requis' });
+  }
+  const sql = 'SELECT * FROM `utilisateur` WHERE email = ?';
+  db.query(sql, [email], async (err, results) => {
     if (err) {
-    return res.status(500).send(err);
+      return res.status(500).send(err);
     }
     if (results.length === 0) {
-    // Si aucune nation n'est trouvée, renvoyer une erreur 404
-    return res.status(404).json({ message: 'Nation not found' });
+      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
-    // Si des résultats sont trouvés, renvoyer les données
-    res.json(results);
+
+    const utilisateur = results[0];
+
+    bcrypt.compare(password, utilisateur.password, (err, result) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      if (!result) {
+        return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      }
+
+      res.json({ message: 'Connexion réussie', utilisateur });
+
     });
   });
-// Endpoint pour ajouter une nouvelle nation
-app.post('/nation', (req, res) => {
-  const { nom, continent } = req.body;
-  const sql = 'INSERT INTO nation (nom, continent) VALUES (?, ?)';
-  db.query(sql, [nom, continent], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json({ id: result.insertId, nom, continent });
-  });
 });
-
-
-
-
-
-// Code pour recup la table sport 
-app.get('/sport', (req, res) => {
-  const sql = 'SELECT * FROM sport';
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json(results);
-  });
-});
-app.post('/sport', (req, res) => {
-  const { nom } = req.body;
-  const sql = 'INSERT INTO sport (nom) VALUES (?)';
-  db.query(sql, [nom], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json({ id: result.insertId, nom });
-  });
-});
-
-
-
-
-// Code pour recup la table athlete 
-app.get('/athlete', (req, res) => {
-  const sql = 'SELECT * FROM athlete';
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json(results);
-  });
-});
-app.get('/athlete/:nom', (req, res) => {
-  // Capture le paramètre 'nom' de l'URL
-  const nom = '%'+req.params.nom+'%';
-  // Crée la requête SQL avec un paramètre pour le nom
-  const sql = 'SELECT * FROM athlete WHERE nom LIKE ? OR prenom LIKE ?';
-
-  db.query(sql, [nom, nom], (err, results) => {
-    if (err) {
-    return res.status(500).send(err);
-    }
-    if (results.length === 0) {
-    // Si aucune nation n'est trouvée, renvoyer une erreur 404
-    return res.status(404).json({ message: 'Athlete not found' });
-    }
-    // Si des résultats sont trouvés, renvoyer les données
-    res.json(results);
-    });
-  });
-app.post('/athlete', (req, res) => {
-  const { nom, prenom } = req.body;
-  const sql = 'INSERT INTO athlete (nom, prenom) VALUES (?, ?)';
-  db.query(sql, [nom, prenom], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json({ id: result.insertId, nom, prenom });
-  });
-});
-
-
-
 
 // Démarrage du serveur
 app.listen(port, () => {
