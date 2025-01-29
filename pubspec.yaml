@@ -57,6 +57,8 @@ flutter:
       - assets/images/fond-accueil-3.jpg
       - assets/images/fond-accueil-3Flou.jpg
       - assets/images/fond-accueil-3FlouM.jpg
+      - assets/images/fond-daccueilvio.jpg
+      - assets/images/fond-daccueilvio2.jpg
       
 
   # The following line ensures that the Material Icons font is

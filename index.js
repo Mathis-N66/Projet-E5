@@ -2,9 +2,9 @@ const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-
 const app = express();
 const port = 3000;
+
 
 app.use(bodyParser.json());
 
@@ -13,16 +13,18 @@ const db = mysql.createConnection({
   host: '10.50.0.24',
   user: 'mathis1',
   password: 'XXKa7TF1B6N0B94E',
-  database: 'gestion_mathis'
+  database: 'Seiko_Craft'
 });
 
 // Connexion à MySQL
-db.connect((err) => {
+db.connect( (err) => {
   if (err) {
     console.error('Erreur de connexion à MySQL:', err);
     return;
   }
   console.log('Connecté à la base de données MySQL');
+  console.log(`Vous êtes connecté à la base de données gestion_mathis.`);
+  console.log(`Connecter vous au PHPmyadmin http://10.50.0.24/phpmyadmin`);
 });
 
 // Routes pour gérer les demandes
@@ -92,6 +94,42 @@ app.post('/connexion', async (req, res) => {
     });
   });
 });
+
+// test le podium 
+// app.get('/podium', (req, res) => {
+//   const sql = 'SELECT * FROM `product`';
+//   db.query(sql, (err, results) => {
+//     if (err) {
+//       return res.status(500).send(err);
+//     }
+//     res.json(results);
+//   });
+// });
+
+app.post('/product/:id_podium'), (req, res) => {
+  const idPodium = req.params.id_podium;
+
+  if (![1, 2, 3].includes(parseInt(idPodium))) {
+    return res.status(400).json({ message: 'id_podium doit être 1, 2 ou 3' });
+  }
+
+  const sql = 'SELECT image_url FROM product WHERE id_podium = ?';
+  
+  db.query(sql, [idPodium], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Aucun produit trouvé pour cet id_podium' });
+    }
+
+    res.json(results);
+
+  });
+};
+
+
 
 // Démarrage du serveur
 app.listen(port, () => {

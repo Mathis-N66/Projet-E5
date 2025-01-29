@@ -96,7 +96,7 @@ class _FormulaireIPage extends State<FormulaireI> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/fond-accueil-3FlouM.jpg"),
+            image: AssetImage("assets/images/fond-daccueilvio2.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -198,7 +198,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                               checkBoxValue = value!;
                             });
                           },
-                          activeColor: const Color.fromARGB(255, 0, 110, 255),
+                          activeColor: const Color.fromARGB(255, 126, 47, 211),
                         ),
                         const Expanded(
                           child: Text(
@@ -212,7 +212,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                     ElevatedButton(
                       onPressed: envoyerDemande,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 94, 237, 86),
+                        backgroundColor: const Color.fromARGB(255, 126, 47, 211),
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -220,7 +220,7 @@ class _FormulaireIPage extends State<FormulaireI> {
                       ),
                       child: const Text(
                         'Envoyer la demande',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
                       ),
                     ),
 

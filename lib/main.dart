@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Positioned.fill(
               child: Image.asset(
-                'assets/images/fond-accueil-3FlouM.jpg',
+                'assets/images/fond-daccueilvio2.jpg',
                 fit: BoxFit.cover,
               ),
             ),
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Text(
                   'Bienvenue à vous !',
                   style: TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: Color.fromARGB(255, 255, 255, 255),
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                   ),
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   'Connectez-vous pour accéder à My App Admin V1',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: Color.fromARGB(255, 255, 255, 255),
                     fontSize: 25,
                   ),
                 ),
@@ -92,8 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 94, 237, 86),
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: const Color.fromARGB(255, 126, 47, 211),
+                            foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
@@ -119,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 94, 237, 86),
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: const Color.fromARGB(255, 126, 47, 211),
+                            foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),

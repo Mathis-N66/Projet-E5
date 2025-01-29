@@ -107,7 +107,7 @@ class _FormulaireCPage extends State<FormulaireC> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/fond-accueil-3FlouM.jpg"),
+            image: AssetImage("assets/images/fond-daccueilvio2.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -209,7 +209,7 @@ class _FormulaireCPage extends State<FormulaireC> {
                               checkBoxValue = value!;
                             });
                           },
-                          activeColor: const Color.fromARGB(255, 0, 110, 255),
+                          activeColor: const Color.fromARGB(255, 126, 47, 211),
                         ),
                         const Expanded(
                           child: Text(
@@ -223,7 +223,7 @@ class _FormulaireCPage extends State<FormulaireC> {
                     ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 94, 237, 86),
+                        backgroundColor: const Color.fromARGB(255, 126, 47, 211),
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -231,7 +231,7 @@ class _FormulaireCPage extends State<FormulaireC> {
                       ),
                       child: const Text(
                         'Se connecter',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
                       ),
                     ),
                   ],
