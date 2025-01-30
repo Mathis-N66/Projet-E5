@@ -33,41 +33,46 @@ class AccueilPage extends StatefulWidget {
   State<AccueilPage> createState() => _AccueilPageState();
 }
 
-
-class ProductBox extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-
-  const ProductBox(this.title, this.imageUrl, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 5, spreadRadius: 2),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.network(imageUrl), // Charger l'image à partir de l'URL
-          Text(title, textAlign: TextAlign.center),
-        ],
-      ),
-    );
-  }
-}
-
 class _AccueilPageState extends State<AccueilPage> {
   int _selectedIndex = 0;
   bool _isAddMenuVisible = false;
-  List<String> podiumImages = ['', '', ''];
+  String userName = "ddd"; 
+  List<String> imageUrls = [
+    "", 
+    "",
+    ""
+  ];
+  
+
+
+  Future<void> fetchImages() async {
+    for (int i = 1; i <= 3; i++) {
+      final url = Uri.parse('http://10.0.2.2:3000/product/$i');
+      
+      print("Fetching from: $url"); // Vérifie l'URL appelée
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            imageUrls[i - 1] = data[0]["image_url"];
+          });
+          print("Image $i: ${imageUrls[i - 1]}"); // Vérifie les URLs obtenues
+        } else {
+          print("Pas d'image pour le produit $i");
+        }
+      } else {
+        print("Erreur ${response.statusCode} pour le produit $i");
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchImages(); // Appel automatique lors du démarrage de la page
+  }
 
   void _onItemTapped(int index) {
     if (index == 2) {
@@ -83,27 +88,6 @@ class _AccueilPageState extends State<AccueilPage> {
     setState(() {
       _isAddMenuVisible = !_isAddMenuVisible;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPodiumImages();
-  }
-
-  Future<void> _fetchPodiumImages() async {
-    for (int i = 1; i <= 3; i++) {
-      final response = await http.get(Uri.parse('http://localhost:3000/product//$i'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          podiumImages[i - 1] = data.isNotEmpty ? data[0]['image_url'] : ''; // Met à jour l'image
-        });
-      } else {
-        print('Erreur lors de la récupération des images pour le podium $i');
-      }
-    }
   }
 
   @override
@@ -266,17 +250,30 @@ class _AccueilPageState extends State<AccueilPage> {
       backgroundColor: const Color.fromARGB(255, 239, 239, 239),
       body: Stack(
         children: [
+          // Section "Hello Linda" - Message d'accueil
+          Positioned(
+            top: 40,
+            left: 20,
+            child: Text(
+              "Hello, $userName!",
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
 
           // Partie Produit carré podium
           Positioned(
-            top: 20,
+            top: 90,
             left: MediaQuery.of(context).size.width * 0.05,
             right: MediaQuery.of(context).size.width * 0.05,
             child: Container(
               width: 500,
               height: 200,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 223, 222, 222),
+                color: const Color.fromARGB(255, 7, 162, 255),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Row(
@@ -284,37 +281,79 @@ class _AccueilPageState extends State<AccueilPage> {
                 children: [
                   // Produit 1 - Le plus bas
                   Transform.translate(
-                    offset: const Offset(0, 0), // Décale légèrement vers le bas
-                    child: const Column(
+                    offset: const Offset(0, 0),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.stars, color: Colors.grey, size: 40), // Icône pour 2ème
-                        SizedBox(height: 10),
-                        ProductBox("Produit 2"),
+                        const Icon(Icons.stars, color: Colors.grey, size: 40),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 80,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            image: imageUrls[0].isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(imageUrls[0]),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: imageUrls[0].isEmpty ? Icon(Icons.error, color: Colors.red) : null,
+                        ),
                       ],
                     ),
                   ),
+
                   // Produit 2 - Celui du milieu
                   Transform.translate(
-                    offset: const Offset(0, -15), // Décale légèrement vers le bas
-                    child: const Column(
+                    offset: const Offset(0, -15),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.stars, color: Colors.amber, size: 40), // Icône pour 1er
-                        SizedBox(height: 10),
-                        ProductBox("Produit 1"),
+                        const Icon(Icons.stars, color: Colors.amber, size: 40),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 80,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            image: imageUrls[1].isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(imageUrls[1]),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
                   // Produit 3 - Le plus haut
                   Transform.translate(
-                    offset: const Offset(0, 10), // Décale légèrement vers le bas
-                    child: const Column(
+                    offset: const Offset(0, 10),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.stars, color: Colors.red, size: 40), // Icône pour 3ème
-                        SizedBox(height: 10),
-                        ProductBox("Produit 3"),
+                        const Icon(Icons.stars, color: Colors.red, size: 40),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 80,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            image: imageUrls[2].isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(imageUrls[2]),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -322,8 +361,6 @@ class _AccueilPageState extends State<AccueilPage> {
               ),
             ),
           ),
-
-
 
           // Partie Raccourcie bouton gerer
           if (_isAddMenuVisible)
@@ -387,7 +424,7 @@ class _AccueilPageState extends State<AccueilPage> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // Action pour ajouter
+                              // Action pour supprimer
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 240, 134, 76),
@@ -433,7 +470,6 @@ class _AccueilPageState extends State<AccueilPage> {
                           ),
                         ],
                       )
-
                     ],
                   ),
                 ],
@@ -510,6 +546,4 @@ class _AccueilPageState extends State<AccueilPage> {
       tooltip: 'Gérer',
     );
   }
-
-
 }

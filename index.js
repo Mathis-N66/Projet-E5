@@ -13,7 +13,7 @@ const db = mysql.createConnection({
   host: '10.50.0.24',
   user: 'mathis1',
   password: 'XXKa7TF1B6N0B94E',
-  database: 'Seiko_Craft'
+  database: 'seiko_craft'
 });
 
 // Connexion à MySQL
@@ -96,28 +96,36 @@ app.post('/connexion', async (req, res) => {
 });
 
 // test le podium 
-// app.get('/podium', (req, res) => {
-//   const sql = 'SELECT * FROM `product`';
-//   db.query(sql, (err, results) => {
-//     if (err) {
-//       return res.status(500).send(err);
-//     }
-//     res.json(results);
-//   });
-// });
+app.get('/podium/:id', (req, res) => {
+  const id = req.params.id;
 
-app.post('/product/:id_podium'), (req, res) => {
-  const idPodium = req.params.id_podium;
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID invalide' });
+  }
 
-  if (![1, 2, 3].includes(parseInt(idPodium))) {
+  const sql = 'SELECT image_url FROM product WHERE id_podium = ?';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    res.json(results);
+  });
+});
+
+
+app.get('/product/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (![1, 2, 3].includes(id)) {
     return res.status(400).json({ message: 'id_podium doit être 1, 2 ou 3' });
   }
 
   const sql = 'SELECT image_url FROM product WHERE id_podium = ?';
-  
-  db.query(sql, [idPodium], (err, results) => {
+
+  db.query(sql, [id], (err, results) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).json({ message: 'Erreur serveur', error: err });
     }
 
     if (results.length === 0) {
@@ -125,10 +133,8 @@ app.post('/product/:id_podium'), (req, res) => {
     }
 
     res.json(results);
-
   });
-};
-
+});
 
 
 // Démarrage du serveur

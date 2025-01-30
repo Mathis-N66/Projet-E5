@@ -53,11 +53,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-      - assets/images/fond-accueil.jpg
-      - assets/images/fond-accueil-3.jpg
-      - assets/images/fond-accueil-3Flou.jpg
-      - assets/images/fond-accueil-3FlouM.jpg
-      - assets/images/fond-daccueilvio.jpg
+      - assets/images/fond-daccueil.jpg
       - assets/images/fond-daccueilvio2.jpg
       
 
