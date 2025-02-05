@@ -70,7 +70,7 @@ app.post('/connexion', async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: 'Email et mot de passe requis' });
   }
-  const sql = 'SELECT * FROM `utilisateur` WHERE email = ?';
+  const sql = 'SELECT * FROM `utilisateur-admin` WHERE email = ?';
   db.query(sql, [email], async (err, results) => {
     if (err) {
       return res.status(500).send(err);
@@ -112,8 +112,6 @@ app.get('/podium/:id', (req, res) => {
     res.json(results);
   });
 });
-
-
 app.get('/product/:id', (req, res) => {
   const id = parseInt(req.params.id);
 
@@ -130,6 +128,46 @@ app.get('/product/:id', (req, res) => {
 
     if (results.length === 0) {
       return res.status(404).json({ message: 'Aucun produit trouvé pour cet id_podium' });
+    }
+
+    res.json(results);
+  });
+});
+
+
+// partie pour la variable person
+app.get('/person/:id', (req, res) => {
+  const id = req.params.id;
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID invalide' });
+  }
+
+  const sql = 'SELECT `nom`, `prenom` FROM `utilisateur-admin` WHERE idUtilisateur = ?';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    res.json(results);
+  });
+});
+app.get('/person/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (![1, 2, 3].includes(id)) {
+    return res.status(400).json({ message: 'id doit etre dans la base' });
+  }
+
+  const sql = 'SELECT `nom`, `prenom` FROM `utilisateur-admin` WHERE idUtilisateur = ?';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erreur serveur', error: err });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Aucun person a etait trouvé pour cet id' });
     }
 
     res.json(results);

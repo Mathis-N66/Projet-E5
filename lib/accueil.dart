@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'formulaireC.dart';
@@ -36,16 +37,13 @@ class AccueilPage extends StatefulWidget {
 class _AccueilPageState extends State<AccueilPage> {
   int _selectedIndex = 0;
   bool _isAddMenuVisible = false;
-  String userName = "ddd"; 
   List<String> imageUrls = [
     "", 
     "",
     ""
   ];
-  
 
-
-  Future<void> fetchImages() async {
+  Future<void> RecupImg() async {
     for (int i = 1; i <= 3; i++) {
       final url = Uri.parse('http://10.0.2.2:3000/product/$i');
       
@@ -68,10 +66,11 @@ class _AccueilPageState extends State<AccueilPage> {
     }
   }
 
+
   @override
   void initState() {
     super.initState();
-    fetchImages(); // Appel automatique lors du démarrage de la page
+    RecupImg(); // Appel automatique lors du démarrage de la page
   }
 
   void _onItemTapped(int index) {
@@ -251,29 +250,53 @@ class _AccueilPageState extends State<AccueilPage> {
       body: Stack(
         children: [
           // Section "Hello Linda" - Message d'accueil
-          Positioned(
-            top: 40,
+          const Positioned(
+            top: 0,
             left: 20,
-            child: Text(
-              "Hello, $userName!",
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Bonjour!",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  "Administrateur",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  "Bienvenu sur My App Admin V1",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 72, 72, 72),
+                  ),
+                ),
+              ],
             ),
           ),
 
+
           // Partie Produit carré podium
           Positioned(
-            top: 90,
+            top: 140,
             left: MediaQuery.of(context).size.width * 0.05,
             right: MediaQuery.of(context).size.width * 0.05,
             child: Container(
               width: 500,
               height: 200,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 7, 162, 255),
+                color: const Color.fromARGB(255, 205, 205, 205) ,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Row(
@@ -295,12 +318,13 @@ class _AccueilPageState extends State<AccueilPage> {
                             borderRadius: BorderRadius.circular(12),
                             image: imageUrls[0].isNotEmpty
                                 ? DecorationImage(
-                                    image: NetworkImage(imageUrls[0]),
+                                    image: NetworkImage(imageUrls[1]),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
-                          child: imageUrls[0].isEmpty ? Icon(Icons.error, color: Colors.red) : null,
+                          
+                          child: imageUrls[0].isEmpty ? const Icon(Icons.error, color: Colors.red) : null,
                         ),
                       ],
                     ),
@@ -322,7 +346,7 @@ class _AccueilPageState extends State<AccueilPage> {
                             borderRadius: BorderRadius.circular(12),
                             image: imageUrls[1].isNotEmpty
                                 ? DecorationImage(
-                                    image: NetworkImage(imageUrls[1]),
+                                    image: NetworkImage(imageUrls[0]),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
@@ -362,8 +386,8 @@ class _AccueilPageState extends State<AccueilPage> {
             ),
           ),
 
-          // Partie Raccourcie bouton gerer
-          if (_isAddMenuVisible)
+        // Partie Raccourcie bouton gerer
+        if (_isAddMenuVisible)
           Positioned(
             bottom: 20,
             left: 20,
@@ -389,11 +413,13 @@ class _AccueilPageState extends State<AccueilPage> {
                 children: [
                   const Text(
                     'Raccourci',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  const SizedBox(height: 20),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 25,
+                    runSpacing: 20,
                     children: [
                       Column(
                         children: [
@@ -404,9 +430,9 @@ class _AccueilPageState extends State<AccueilPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 245, 196, 62),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              minimumSize: const Size(30, 30),
+                              minimumSize: const Size(40, 55),
                             ),
                             child: const Icon(
                               Icons.add_shopping_cart,
@@ -429,9 +455,9 @@ class _AccueilPageState extends State<AccueilPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 240, 134, 76),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              minimumSize: const Size(30, 30),
+                              minimumSize: const Size(40, 55),
                             ),
                             child: const Icon(
                               Icons.remove_shopping_cart,
@@ -454,22 +480,98 @@ class _AccueilPageState extends State<AccueilPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 239, 6, 128),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              minimumSize: const Size(0, 0), // Taille carrée
+                              minimumSize: const Size(40, 55),
                             ),
                             child: const Icon(
-                              Icons.delete,
+                              Icons.manage_accounts,
                               color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 5),
                           const Text(
-                            'Supprimer',
+                            'Utilisateur',
                             style: TextStyle(fontSize: 14),
                           ),
                         ],
-                      )
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // Action pour supprimer
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 85, 25, 145),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              minimumSize: const Size(40, 55),
+                            ),
+                            child: const Icon(
+                              Icons.inventory,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Stock',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // Action pour supprimer
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 17, 158, 238),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              minimumSize: const Size(40, 55),
+                            ),
+                            child: const Icon(
+                              Icons.settings,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Parametres',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // Action pour supprimer
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 236, 236, 236),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              minimumSize: const Size(40, 55),
+                            ),
+                            child: const Icon(
+                              Icons.more_horiz,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                            'Autres',
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
@@ -483,10 +585,10 @@ class _AccueilPageState extends State<AccueilPage> {
       bottomNavigationBar: BottomNavigationBar(
         items: [
           _buildNavBarItem(Icons.home, "Accueil", 0),
-          _buildNavBarItem(Icons.shopping_bag, "produits", 1),
+          _buildNavBarItem(Icons.shopping_bag, "Produits", 1),
           _buildAddItem(),
           _buildNavBarItem(Icons.signal_cellular_alt, "Progres", 3),
-          _buildNavBarItem(Icons.account_circle, "Profile", 4),
+          _buildNavBarItem(Icons.account_circle, "Profil", 4),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'mdp-oublie.dart';
 import 'accueil.dart'; 
 
@@ -49,6 +50,11 @@ class _FormulaireCPage extends State<FormulaireC> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  Future<void> saveUserId(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', userId);
+  }
+
   Future<void> _login() async {
     final email = _emailController.text;
     final password = _passwordController.text;
@@ -80,11 +86,12 @@ class _FormulaireCPage extends State<FormulaireC> {
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
+      
       print(responseData);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Connexion réussie')),
       );
-      Navigator.push<void>(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute<void>(
           builder: (context) => const AccueilPage(title: 'Accueil'),
