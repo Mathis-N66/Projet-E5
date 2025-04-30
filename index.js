@@ -23,7 +23,7 @@ db.connect( (err) => {
     return;
   }
   console.log('Connecté à la base de données MySQL');
-  console.log(`Vous êtes connecté à la base de données gestion_mathis.`);
+  console.log(`Vous êtes connecté à la base de données Seiko_Craft.`);
   console.log(`Connecter vous au PHPmyadmin http://10.50.0.24/phpmyadmin`);
 });
 
@@ -170,6 +170,18 @@ app.get('/person/:id', (req, res) => {
       return res.status(404).json({ message: 'Aucun person a etait trouvé pour cet id' });
     }
 
+    res.json(results);
+  });
+});
+
+
+// partie pour recuperer les produits
+app.get('/products', (req, res) => {
+  const sql = 'SELECT id, image_url, name FROM `product`';
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erreur serveur', error: err });
+    }
     res.json(results);
   });
 });
