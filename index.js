@@ -177,7 +177,7 @@ app.get('/person/:id', (req, res) => {
 
 // partie pour recuperer les produits
 app.get('/products', (req, res) => {
-  const sql = 'SELECT id, image_url, name FROM `product`';
+  const sql = 'SELECT id, image_url, name, price FROM `product`';
   db.query(sql, (err, results) => {
     if (err) {
       return res.status(500).json({ message: 'Erreur serveur', error: err });
@@ -191,3 +191,4 @@ app.get('/products', (req, res) => {
 app.listen(port, () => {
   console.log(`Serveur API en écoute sur http://localhost:${port}`);
 });
+

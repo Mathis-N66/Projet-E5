@@ -28,8 +28,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  http: ^0.13.6
-  shared_preferences: ^2.2.2
+  fl_chart: ^0.63.0
+  http: ^0.14.0
+  shared_preferences: ^2.5.3
   flutter:
     sdk: flutter
 

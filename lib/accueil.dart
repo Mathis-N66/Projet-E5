@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fl_chart/fl_chart.dart';
 import 'formulaireC.dart';
 
 void main() {
@@ -21,22 +22,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Produit {
-  final int id;
-  final String nom;
-  final String imageUrl;
-
-  Produit({required this.id, required this.nom, required this.imageUrl});
-
-  factory Produit.fromJson(Map<String, dynamic> json) {
-    return Produit(
-      id: json['id'],
-      nom: json['nom'],
-      imageUrl: json['image_url'],
-    );
-  }
-}
-
 class AccueilPage extends StatefulWidget {
   const AccueilPage({super.key, required this.title});
   final String title;
@@ -45,11 +30,34 @@ class AccueilPage extends StatefulWidget {
   State<AccueilPage> createState() => _AccueilPageState();
 }
 
+class Produit {
+  final int id;
+  final String nom;
+  final String imageUrl;
+  final double prix;
+
+  Produit({
+    required this.id,
+    required this.nom,
+    required this.imageUrl,
+    required this.prix,
+  });
+
+  factory Produit.fromJson(Map<String, dynamic> json) {
+    return Produit(
+      id: json['id'],
+      nom: json['name'] ?? 'Sans nom',
+      imageUrl: json['image_url'] ?? 'https://via.placeholder.com/50',
+      prix: double.tryParse(json['price'].toString()) ?? 0.0,
+    );
+  }
+}
+
+
 class _AccueilPageState extends State<AccueilPage> {
   int _selectedIndex = 0;
   bool _isAddMenuVisible = false;
   List<String> imageUrls = ["", "", ""];
-  List<Produit> produits = [];
 
   Future<void> RecupImg() async {
     for (int i = 1; i <= 3; i++) {
@@ -66,23 +74,29 @@ class _AccueilPageState extends State<AccueilPage> {
     }
   }
 
-Future<void> fetchProduits() async {
-  final url = Uri.parse('http://10.0.2.2:3000/products');
-  try {
-    final response = await http.get(url);
-    print('Status: ${response.statusCode}');
-    print('Body: ${response.body}');
+Future<List<Produit>> fetchProduits() async {
+  final response = await http.get(Uri.parse('http://10.0.2.2:3000/products'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      setState(() {
-        produits = data.map((json) => Produit.fromJson(json)).toList();
-      });
-    } else {
-      print('Erreur HTTP: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Erreur réseau ou parsing: $e');
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body);
+    return data.map((json) => Produit.fromJson(json)).toList();
+  } else {
+    throw Exception('Erreur de chargement des produits');
+  }
+}
+
+Future<void> updateProduit(Produit produit) async {
+  final response = await http.put(
+    Uri.parse('http://10.0.2.2:3000/products/${produit.id}'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'nom': produit.nom,
+      'prix': produit.prix,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Échec de la mise à jour du produit');
   }
 }
 
@@ -92,7 +106,6 @@ Future<void> fetchProduits() async {
   void initState() {
     super.initState();
     RecupImg();
-    fetchProduits();
   }
 
   void _onItemTapped(int index) {
@@ -112,6 +125,69 @@ Future<void> fetchProduits() async {
     Navigator.pop(context);
     _onItemTapped(index);
   }
+
+void _showEditDialog(BuildContext context, Produit produit) {
+  final nomController = TextEditingController(text: produit.nom);
+  final prixController = TextEditingController(text: produit.prix.toString());
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Modifier ${produit.nom}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nomController,
+              decoration: const InputDecoration(labelText: 'Nom'),
+            ),
+            TextField(
+              controller: prixController,
+              decoration: const InputDecoration(labelText: 'Prix'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final nouveauNom = nomController.text;
+              final nouveauPrix = double.tryParse(prixController.text) ?? produit.prix;
+
+              final produitModifie = Produit(
+                id: produit.id,
+                nom: nouveauNom,
+                prix: nouveauPrix,
+                imageUrl: produit.imageUrl,
+              );
+
+              try {
+                await updateProduit(produitModifie);
+                Navigator.of(context).pop(); // Fermer le popup
+
+                // Si tu veux recharger les produits automatiquement, tu peux setState ou notifier un changement
+                // Par exemple :
+                setState(() {}); // Si tu es dans un StatefulWidget
+              } catch (e) {
+                print('Erreur lors de la mise à jour : $e');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erreur lors de la mise à jour')),
+                );
+              }
+            },
+
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -290,49 +366,142 @@ Future<void> fetchProduits() async {
   }
 
   Widget _buildProduits() {
-    return produits.isEmpty
-        ? const Center(child: CircularProgressIndicator())
-        : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: produits.length,
-            itemBuilder: (context, index) {
-              final produit = produits[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
+    return FutureBuilder<List<Produit>>(
+      future: fetchProduits(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Erreur : ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Aucun produit disponible'));
+        }
+
+        final produits = snapshot.data!;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                "Page Produits",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: produits.length,
+                itemBuilder: (context, index) {
+                  final produit = produits[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: Image.network(
                       produit.imageUrl,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image, size: 60),
                     ),
-                  ),
-                  title: Text(produit.nom, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('ID: ${produit.id}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      // TODO: Supprimer un produit
-                    },
-                  ),
-                ),
-              );
-            },
-          );
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          produit.nom,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${produit.prix.toStringAsFixed(2)} €',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        _showEditDialog(context, produit);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
+
+
 
   Widget _buildProfil() {
     return const Center(child: Text("Page Profile", style: TextStyle(fontSize: 24)));
   }
 
   Widget _buildProgres() {
-    return const Center(child: Text("Page Progrès", style: TextStyle(fontSize: 24)));
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Statistiques de Progrès", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 30),
+            const Text("Ventes (7 derniers jours)", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            SizedBox(height: 200, child: _buildLineChart([5, 8, 6, 10, 12, 9, 14], Colors.purple)),
+            const SizedBox(height: 40),
+            const Text("Nouveaux utilisateurs (7 derniers jours)", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            SizedBox(height: 200, child: _buildLineChart([2, 4, 3, 5, 6, 7, 8], Colors.green)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLineChart(List<int> dataPoints, Color lineColor) {
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(show: true),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, _) {
+                int day = value.toInt();
+                if (day >= 0 && day < 7) {
+                  return Text('J${day + 1}', style: const TextStyle(fontSize: 10));
+                }
+                return const SizedBox();
+              },
+              interval: 1,
+            ),
+          ),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(show: true),
+        minX: 0,
+        maxX: 6,
+        minY: 0,
+        maxY: (dataPoints.reduce((a, b) => a > b ? a : b) + 2).toDouble(),
+        lineBarsData: [
+          LineChartBarData(
+            spots: List.generate(
+              dataPoints.length,
+              (index) => FlSpot(index.toDouble(), dataPoints[index].toDouble()),
+            ),
+            isCurved: true,
+            color: lineColor,
+            barWidth: 3,
+            dotData: FlDotData(show: true),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFloatingMenu() {
