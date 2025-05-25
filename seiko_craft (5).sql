@@ -1,30 +1,4 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Hôte : 127.0.0.1:3306
--- Généré le : mer. 07 mai 2025 à 09:52
--- Version du serveur : 8.3.0
--- Version de PHP : 8.2.18
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Base de données : `seiko_craft`
---
-
 DELIMITER $$
---
--- Procédures
---
 DROP PROCEDURE IF EXISTS `verifie`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `verifie` (IN `demandeId` INT)   BEGIN
     -- Modifier le statut de la personne spécifiée en "Vérifié"
@@ -34,12 +8,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `verifie` (IN `demandeId` INT)   BEG
 END$$
 
 DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `categorie`
---
 
 DROP TABLE IF EXISTS `categorie`;
 CREATE TABLE IF NOT EXISTS `categorie` (
@@ -51,9 +19,6 @@ CREATE TABLE IF NOT EXISTS `categorie` (
   UNIQUE KEY `idx_nom` (`nom`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `categorie`
---
 
 INSERT INTO `categorie` (`id`, `nom`, `URLimage`) VALUES
 (1, 'SEIKOLUS', 'https://seiko-mods.fr/cdn/shop/files/Seikolus_Tiffany__1.jpg?v=1696857930&width=535'),
@@ -65,11 +30,6 @@ INSERT INTO `categorie` (`id`, `nom`, `URLimage`) VALUES
 (7, 'SEIKO GMT', 'https://seiko-mods.fr/cdn/shop/files/Seiko_GMT_Batman_1.jpg?v=1690902716&width=535'),
 (8, 'SEIKONAUT', 'https://seiko-mods.fr/cdn/shop/collections/Seikonaut_orange_1.jpg?v=1697481461&width=535');
 
--- --------------------------------------------------------
-
---
--- Structure de la table `demande-i`
---
 
 DROP TABLE IF EXISTS `demande-i`;
 CREATE TABLE IF NOT EXISTS `demande-i` (
@@ -85,17 +45,11 @@ CREATE TABLE IF NOT EXISTS `demande-i` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `demande-i`
---
 
 INSERT INTO `demande-i` (`idDemande`, `nom`, `prenom`, `email`, `password`, `motifDemande`, `dateDemande`, `status`) VALUES
 (1, 'admin', 'admin', 'admin', '$2b$10$In8RCsCUl2TSjvUNXlNlBuHptIKklmUYIfrGBjpwnzTxlOkaXIBmS', 'admin', '2025-01-20 15:53:47', 'Vérifié'),
 (2, 'sabi', 'sofia', 'zegmailm.com', '$2b$10$j3QheurCBKRIMG4DxPJWYOkgfyGvHJhLDqUDwVM8Cv7bDSMad.epq', '(((((', '2025-01-22 08:03:45', 'Vérifié');
 
---
--- Déclencheurs `demande-i`
---
 DROP TRIGGER IF EXISTS `ajouter_utilisateur`;
 DELIMITER $$
 CREATE TRIGGER `ajouter_utilisateur` AFTER UPDATE ON `demande-i` FOR EACH ROW BEGIN
@@ -126,11 +80,6 @@ END
 $$
 DELIMITER ;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `log_demande`
---
 
 DROP TABLE IF EXISTS `log_demande`;
 CREATE TABLE IF NOT EXISTS `log_demande` (
@@ -149,11 +98,6 @@ CREATE TABLE IF NOT EXISTS `log_demande` (
   KEY `idUtilisateur` (`idUtilisateur`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `product`
---
 
 DROP TABLE IF EXISTS `product`;
 CREATE TABLE IF NOT EXISTS `product` (
@@ -170,9 +114,6 @@ CREATE TABLE IF NOT EXISTS `product` (
   KEY `fk_product_categorie` (`categorie`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3;
 
---
--- Déchargement des données de la table `product`
---
 
 INSERT INTO `product` (`id`, `name`, `description`, `price`, `image_url`, `stock`, `created_at`, `id_podium`, `categorie`) VALUES
 (1, 'SKX007 Marine Master Mod', 'Modification Marine Master avec cadran saphir', 899.00, 'https://seiko-mods.fr/cdn/shop/files/129D3777-9557-404B-A188-09AB6A5BFA15.jpg?v=1696855380&width=535', 10, '2024-11-28 09:12:30', NULL, 4),
@@ -190,9 +131,6 @@ INSERT INTO `product` (`id`, `name`, `description`, `price`, `image_url`, `stock
 (13, 'Seiko SRPE Military Field', 'Style militaire avec cadran kaki', 400.00, 'https://tse1.mm.bing.net/th?id=OIP._7Lh5xxYz6Cvoy8G4TQLKwHaJn&pid=Api', 18, '2024-11-28 08:12:30', NULL, 3),
 (14, 'Seiko Prospex Solar Chrono', 'Chronographe solaire précis et robuste', 650.00, 'https://tse3.mm.bing.net/th?id=OIP.N_cEzhGxBBiABeKIXULr7wHaHa&pid=Api', 16, '2024-11-28 08:12:30', NULL, 2);
 
---
--- Déclencheurs `product`
---
 DROP TRIGGER IF EXISTS `Maj_idpodium_enfonction`;
 DELIMITER $$
 CREATE TRIGGER `Maj_idpodium_enfonction` BEFORE UPDATE ON `product` FOR EACH ROW BEGIN
@@ -209,12 +147,6 @@ END
 $$
 DELIMITER ;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `role`
---
-
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -222,53 +154,9 @@ CREATE TABLE IF NOT EXISTS `role` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `role`
---
-
 INSERT INTO `role` (`id`, `libelle`) VALUES
 (1, 'Administrateur'),
 (2, 'Client');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `test`
---
-
-DROP TABLE IF EXISTS `test`;
-CREATE TABLE IF NOT EXISTS `test` (
-  `id` int NOT NULL,
-  `nom` varchar(255) NOT NULL,
-  `continent` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Déchargement des données de la table `test`
---
-
-INSERT INTO `test` (`id`, `nom`, `continent`) VALUES
-(1, 'France', 'europe'),
-(2, 'Allemagne', 'europe'),
-(3, 'Etats-Unis', 'amérique'),
-(4, 'Italie', 'europe'),
-(5, 'Royaume Uni', 'europe'),
-(6, 'Argentine', 'amérique'),
-(7, 'Espagne', 'europe'),
-(8, 'Afrique du Sud', 'afrique'),
-(9, 'Brésil', 'amérique'),
-(10, 'Chine', 'asie'),
-(11, 'Jamaïque', 'amérique'),
-(12, 'Kenya', 'afrique'),
-(13, 'Ethiopie', 'afrique'),
-(14, 'Russie', 'europe');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `utilisateur`
---
 
 DROP TABLE IF EXISTS `utilisateur`;
 CREATE TABLE IF NOT EXISTS `utilisateur` (
@@ -283,21 +171,11 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
   KEY `idRole` (`idRole`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `utilisateur`
---
-
 INSERT INTO `utilisateur` (`id`, `email`, `mdp`, `nom`, `prenom`, `idRole`) VALUES
 (1, 'matartcha@gmail.com', '$2y$10$o9tZdQUrO07AJd3uX.ZEA.NaAsQ8zb1ojv9m1ETyxAsLsw.HXaUDi', 'nene', 'mathis', NULL),
 (3, 'matartchaqqqq@gmail.com', '$2y$10$1Zjvj2lAjYhNcVOeOfX5fOKSHwr48j.Llj/YnAivVMeX6lcpBxHE2', 'nene', 'mathis', NULL),
 (4, 'matartssdacha@gmail.com', '$2y$10$QIrSum3yUANuqQf09Lci3O277ORrmX/fL9Qq5jlMgnbVdjkyTv2d6', 'nene', 'mathis', NULL),
 (5, 'matartc020ha@gmail.com', '$2y$10$1pYrg8SB8r4MJbY/Ke5Sz.1hnpRKU2NMxsYuhjq91z7o2f9Ya2LdK', 'nene', 'mathis', NULL);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `utilisateur-admin`
---
 
 DROP TABLE IF EXISTS `utilisateur-admin`;
 CREATE TABLE IF NOT EXISTS `utilisateur-admin` (
@@ -315,30 +193,13 @@ CREATE TABLE IF NOT EXISTS `utilisateur-admin` (
   KEY `fk_utilisateur_demande` (`idDemande`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `utilisateur-admin`
---
 
 INSERT INTO `utilisateur-admin` (`idUtilisateur`, `nom`, `prenom`, `email`, `password`, `idRole`, `dateCreation`, `idDemande`) VALUES
 (1, 'admin', 'admin', 'admin', '$2b$10$In8RCsCUl2TSjvUNXlNlBuHptIKklmUYIfrGBjpwnzTxlOkaXIBmS', 4, '2025-01-20 15:54:15', 1);
 
---
--- Contraintes pour les tables déchargées
---
-
---
--- Contraintes pour la table `product`
---
 ALTER TABLE `product`
   ADD CONSTRAINT `fk_product_categorie` FOREIGN KEY (`categorie`) REFERENCES `categorie` (`id`);
 
---
--- Contraintes pour la table `utilisateur`
---
 ALTER TABLE `utilisateur`
   ADD CONSTRAINT `utilisateur_ibfk_1` FOREIGN KEY (`idRole`) REFERENCES `role` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
